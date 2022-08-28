@@ -19,7 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,7 @@ public class UpdateStatutActivity extends AppCompatActivity {
 
      private TextView mAdresse;
      private TextView mBordereauTextView;
-     private Button mButton;
+     private ArrayList<Button> mButtons;
      private String mBordereau;
      private Courrier mCourrier;
      private ArrayList<Statut> mStatuts = new ArrayList<>();
@@ -45,14 +47,11 @@ public class UpdateStatutActivity extends AppCompatActivity {
 
           mAdresse = findViewById(R.id.updatestatut_activity_adresse);
           mBordereauTextView = findViewById(R.id.updatestatut_activity_bordereau);
-          mButton = findViewById(R.id.updatestatut_activity_button);
 
           Intent intent = getIntent();
           mBordereau = intent.getStringExtra("bordereau");
           mBordereauTextView.setText(mBordereau);
           mUrl = mUrl + mBordereau;
-
-
 
           JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, mUrl, null, new Response.Listener<JSONObject>() {
                @Override
@@ -73,17 +72,23 @@ public class UpdateStatutActivity extends AppCompatActivity {
                          statuts = response.getJSONArray("statuts");
                          for (int i = 0; i < statuts.length(); i++) {
                               Statut s = new Statut(statuts.getJSONObject(i));
-                              System.out.println("coucou " + s.getEtat());
                               mStatuts.add(s);
                          }
-                    } catch (JSONException e) {
+                    } catch (JSONException | ParseException e) {
                          e.printStackTrace();
                     }
                     if (mStatuts.size() != 0) {
-                         System.out.println("size " + mStatuts.size());
-                         Statut s = mStatuts.get(mStatuts.size() - 1);
-                         System.out.println("etat " + s.getEtat());
-                         mButton.setText(s.getEtat());                    }
+                         String text = mStatuts.get(mStatuts.size() - 1).getEtatMessage();
+                         String date = mStatuts.get(mStatuts.size() - 1).getDate();
+                         mAdresse.append("\n\n" + text + " : " + date);
+                    }
+
+                    switch ( mStatuts.get(mStatuts.size() - 1).getEtat()) {
+                         case 1:
+                              caseNonCollecte(1, "pas encore collecté");
+                              break;
+                    }
+
                }
           }, new Response.ErrorListener() {
                @Override
@@ -95,7 +100,6 @@ public class UpdateStatutActivity extends AppCompatActivity {
                public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> params = new HashMap<String, String>();
                     params.put("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY2MTYyNzEwNSwiZXhwIjoxNjYyMjMxOTA1fQ.XVlT5exmDCvEaSMXoGAXOQ8B4na0VtZu7qoo2J9-2JM");
-                    params.put("Accept-Language", "fr");
 
                     return params;
                }
@@ -103,5 +107,10 @@ public class UpdateStatutActivity extends AppCompatActivity {
           RequestQueue mRequestQueue = Volley.newRequestQueue(UpdateStatutActivity.this);
           mRequestQueue.add(jsonObjectRequest);
 
+     }
+
+     private void caseNonCollecte(int etat, String text) {
+          Button button = new Button(this);
+          button.setText(text);
      }
 }

@@ -2,23 +2,32 @@ package fr.cyrilponsan.applimobile.model;
 
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Statut {
 
-     private final String date;
-     private int etat;
+     private final Date date;
+     private final int etat;
+     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
-     public Statut(JSONObject statut) {
-          date = statut.optString("date");
+     public Statut(JSONObject statut) throws ParseException {
           etat = statut.optInt("statut_id");
+          SimpleDateFormat tmpDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+          date = tmpDateFormat.parse(statut.optString("date"));
      }
 
      public String getDate() {
-          return date;
+          return dateFormat.format(date);
      }
 
-     public String getEtat() {
+     public int getEtat() {
+          return etat;
+     }
+
+     public String getEtatMessage() {
           String value = "";
-          System.out.println("get etat " + etat);
           switch (etat) {
                case 1:
                     value = "pas encore collecté";
