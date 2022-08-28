@@ -10,6 +10,7 @@ public class Courrier {
      private final String prenom;
      private final String nom;
      private final String adresse;
+     private final String complement;
      private final String codePostal;
      private final String ville;
 
@@ -20,8 +21,21 @@ public class Courrier {
           prenom = courrier.optString("prenom");
           nom = courrier.optString("nom");
           adresse = courrier.optString("adresse");
+          if (courrier.opt("complement") != null) {
+               complement = courrier.optString("complement") + "\n";
+          } else {
+               complement = "";
+          }
           codePostal = courrier.optString("codePostal");
           ville = courrier.optString("ville");
+     }
+
+     public String getFullName() {
+          return (civilite + " " + prenom + " " + nom + "\n").toUpperCase();
+     }
+
+     public String getFullAdresse() {
+          return (adresse + "\n" + complement + codePostal + " " + ville + "\n\n").toUpperCase();
      }
 
      public int getId() { return id; }

@@ -5,21 +5,28 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class Statut {
 
      private final Date date;
      private final int etat;
-     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy");
+     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.FRANCE);
 
      public Statut(JSONObject statut) throws ParseException {
           etat = statut.optInt("statut_id");
-          SimpleDateFormat tmpDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+          System.out.println(statut.optString("date"));
+          SimpleDateFormat tmpDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.FRANCE);
           date = tmpDateFormat.parse(statut.optString("date"));
      }
 
      public String getDate() {
           return dateFormat.format(date);
+     }
+
+     private String getTime() {
+          SimpleDateFormat timeDateFormat = new SimpleDateFormat("HH'h'mm", Locale.FRANCE);
+          return  timeDateFormat.format(date);
      }
 
      public int getEtat() {
@@ -37,5 +44,9 @@ public class Statut {
                   "retour à l'expéditeur"
           };
           return etats[etat - 1];
+     }
+
+     public String getStatutMessage() {
+          return ("\n" + getEtatMessage() + " le : " + getDate()).toUpperCase() + "\n à " + getTime();
      }
 }

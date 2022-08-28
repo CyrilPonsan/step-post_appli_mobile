@@ -59,26 +59,20 @@ public class UpdateStatutActivity extends AppCompatActivity {
                try {
                     courrier = response.getJSONObject("courrier");
                     mCourrier = new Courrier(courrier);
-                    String nom = mCourrier.getCivilite() + " " + mCourrier.getPrenom() + " " + mCourrier.getNom() + "\n";
-                    String adresse = mCourrier.getAdresse() + "\n";
-                    String ville = mCourrier.getCodePostal() + " " + mCourrier.getVille();
-                    mAdresse.setText((nom + adresse + ville).toUpperCase());
+                    mAdresse.setText(mCourrier.getFullName() + mCourrier.getFullAdresse());
                } catch (JSONException e) {
                     e.printStackTrace();
                }
                try {
                     statuts = response.getJSONArray("statuts");
                     for (int i = 0; i < statuts.length(); i++) {
-                         Statut s = new Statut(statuts.getJSONObject(i));
-                         mStatuts.add(s);
+                         mStatuts.add(new Statut(statuts.getJSONObject(i)));
                     }
                } catch (JSONException | ParseException e) {
                     e.printStackTrace();
                }
                if (mStatuts.size() != 0) {
-                    String text = mStatuts.get(mStatuts.size() - 1).getEtatMessage().toUpperCase();
-                    String date = mStatuts.get(mStatuts.size() - 1).getDate();
-                    mAdresse.append("\n\n" + text + " : " + date);
+                    mAdresse.append(mStatuts.get(mStatuts.size() - 1).getStatutMessage());
                }
 
                switch ( mStatuts.get(mStatuts.size() - 1).getEtat()) {
@@ -110,7 +104,6 @@ public class UpdateStatutActivity extends AppCompatActivity {
 
      private void updateStatut(int etat, RequestQueue requestQueue) {
           String url = mUrl + "courriers/update-statut?state=" + etat + "&bordereau=" + mBordereau;
-          System.out.println("url " + url);
           JsonObjectRequest updateStatutRequest = new JsonObjectRequest(
                   Request.Method.GET,
                   url,
