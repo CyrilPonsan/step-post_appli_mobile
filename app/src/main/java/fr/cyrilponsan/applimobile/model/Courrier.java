@@ -4,6 +4,8 @@ import org.json.JSONObject;
 
 public class Courrier {
 
+     private final int id;
+     private final String bordereau;
      private final String civilite;
      private final String prenom;
      private final String nom;
@@ -12,6 +14,8 @@ public class Courrier {
      private final String ville;
 
      public Courrier(JSONObject courrier) {
+          id = courrier.optInt("id");
+          bordereau = courrier.optString("bordereau");
           civilite = courrier.optString("civilite");
           prenom = courrier.optString("prenom");
           nom = courrier.optString("nom");
@@ -19,6 +23,8 @@ public class Courrier {
           codePostal = courrier.optString("codePostal");
           ville = courrier.optString("ville");
      }
+
+     public int getId() { return id; }
 
      public String getCivilite() {
           return civilite;

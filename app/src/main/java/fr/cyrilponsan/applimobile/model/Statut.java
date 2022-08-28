@@ -10,7 +10,7 @@ public class Statut {
 
      private final Date date;
      private final int etat;
-     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy");
 
      public Statut(JSONObject statut) throws ParseException {
           etat = statut.optInt("statut_id");
@@ -27,30 +27,15 @@ public class Statut {
      }
 
      public String getEtatMessage() {
-          String value = "";
-          switch (etat) {
-               case 1:
-                    value = "pas encore collecté";
-                    break;
-               case 2:
-                    value = "pris en charge";
-                    break;
-               case 3:
-                    value = "avisé";
-                    break;
-               case 4:
-                    value = "mis en instance";
-                    break;
-               case 5:
-                    value = "distribué";
-                    break;
-               case 6:
-                    value = "NPAI";
-                    break;
-               case 7:
-                    value = "retour à l'expéditeur";
-                    break;
-          }
-          return value;
+          String[] etats = {
+                  "pas encore collecté",
+                  "pris en charge",
+                  "avisé",
+                  "mis en instance",
+                  "distribué",
+                  "NPAI",
+                  "retour à l'expéditeur"
+          };
+          return etats[etat - 1];
      }
 }
