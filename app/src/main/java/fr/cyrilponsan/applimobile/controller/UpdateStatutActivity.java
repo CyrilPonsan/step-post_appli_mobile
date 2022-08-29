@@ -26,6 +26,7 @@ import java.util.Map;
 import fr.cyrilponsan.applimobile.R;
 import fr.cyrilponsan.applimobile.model.Courrier;
 import fr.cyrilponsan.applimobile.model.Statut;
+import fr.cyrilponsan.applimobile.model.User;
 
 public class UpdateStatutActivity extends AppCompatActivity {
 
@@ -34,6 +35,7 @@ public class UpdateStatutActivity extends AppCompatActivity {
      private LinearLayout mButtonLayout;
      private String mBordereau;
      private Courrier mCourrier;
+     private User mUser;
      private final ArrayList<Statut> mStatuts = new ArrayList<>();
      private final String mUrl = "https://step-post-nodejs.herokuapp.com/";
 
@@ -50,6 +52,8 @@ public class UpdateStatutActivity extends AppCompatActivity {
 
           Intent intent = getIntent();
           mBordereau = intent.getStringExtra("bordereau");
+          mUser = intent.getParcelableExtra("user");
+
           bordereauTextView.setText(mBordereau);
           String url = mUrl + "recherchecourrier/bordereau?bordereau=" + mBordereau;
 
@@ -85,7 +89,7 @@ public class UpdateStatutActivity extends AppCompatActivity {
                @Override
                public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<>();
-                    params.put("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY2MTYyNzEwNSwiZXhwIjoxNjYyMjMxOTA1fQ.XVlT5exmDCvEaSMXoGAXOQ8B4na0VtZu7qoo2J9-2JM");
+                    params.put("Authorization", "Bearer " + mUser.getToken());
 
                     return params;
                }
@@ -113,7 +117,7 @@ public class UpdateStatutActivity extends AppCompatActivity {
                @Override
                public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<>();
-                    params.put("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY2MTYyNzEwNSwiZXhwIjoxNjYyMjMxOTA1fQ.XVlT5exmDCvEaSMXoGAXOQ8B4na0VtZu7qoo2J9-2JM");
+                    params.put("Authorization", "Bearer " + mUser.getToken());
 
                     return params;
                }
