@@ -99,13 +99,13 @@ public class MainActivity extends AppCompatActivity {
                   Request.Method.POST,
                   url,
                   jsonParams,
-                  this::handleLoginResponse,
+                  this::handleResponse,
                   this::handleError
           );
           requestQueue.add(jsonObjectRequest);
      }
 
-     private void handleLoginResponse(JSONObject response) {
+     private void handleResponse(JSONObject response) {
           User user = new User(response);
           Intent intent = new Intent(MainActivity.this, RechercheCourrier.class);
           intent.putExtra("user", user);

@@ -47,6 +47,6 @@ public class Statut {
      }
 
      public String getStatutMessage() {
-          return ("\n" + getEtatMessage() + " le : " + getDate()).toUpperCase() + "\n à " + getTime();
+          return ("\n" + getEtatMessage() + " le :\n" + getDate()).toUpperCase() + " à " + getTime();
      }
 }
