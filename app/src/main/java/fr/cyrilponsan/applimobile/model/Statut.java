@@ -15,7 +15,6 @@ public class Statut {
 
      public Statut(JSONObject statut) throws ParseException {
           etat = statut.optInt("statut_id");
-          System.out.println(statut.optString("date"));
           SimpleDateFormat tmpDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.FRANCE);
           date = tmpDateFormat.parse(statut.optString("date"));
      }
