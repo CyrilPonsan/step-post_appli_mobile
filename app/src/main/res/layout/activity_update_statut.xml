@@ -9,12 +9,19 @@
     android:orientation="vertical"
     android:padding="8dp">
 
+    <Button
+        android:id="@+id/update_statut_activity_retour_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="retour" />
+
     <TextView
     android:id="@+id/update_statut_activity_adresse"
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:layout_margin="8dp"
-    android:layout_weight="6"
+    android:layout_weight="7"
     android:gravity="center_vertical"
     android:padding="8dp"
     android:textColor="#140a82"
@@ -30,39 +37,54 @@
         android:orientation="vertical">
 
         <Button
+            android:id="@+id/update_statut_activity_delete_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="effacer"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
             android:id="@+id/update_statut_activity_button2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_gravity="center_horizontal" />
 
         <Button
             android:id="@+id/update_statut_activity_button3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_gravity="center_horizontal" />
 
         <Button
             android:id="@+id/update_statut_activity_button4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_gravity="center_horizontal" />
 
         <Button
             android:id="@+id/update_statut_activity_button5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_gravity="center_horizontal" />
 
         <Button
             android:id="@+id/update_statut_activity_button6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_gravity="center_horizontal" />
 
         <Button
             android:id="@+id/update_statut_activity_button7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_gravity="center_horizontal" />
 
     </LinearLayout>

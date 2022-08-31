@@ -1,7 +1,9 @@
 package fr.cyrilponsan.applimobile.controller;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -43,6 +45,8 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
      private Button mButton5;
      private Button mButton6;
      private Button mButton7;
+     private Button mDeleteButton;
+     private Button mRetourButton;
      private TextView mAdresse;
      private ArrayList<Button> mButtons = new ArrayList<>();
      private LinearLayout mButtonLayout;
@@ -52,13 +56,15 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
      private final ArrayList<Statut> mStatuts = new ArrayList<>();
      private final String mUrl = "https://step-post-nodejs.herokuapp.com";
      private ImageView mAvatar;
+     private RequestQueue mRequestQueue;
+     private ArrayList<String> mEtatsList = new ArrayList<>();
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
           setContentView(R.layout.activity_update_statut);
 
-          RequestQueue mRequestQueue = Volley.newRequestQueue(UpdateStatutActivity.this);
+          mRequestQueue = Volley.newRequestQueue(UpdateStatutActivity.this);
 
           mAdresse = findViewById(R.id.update_statut_activity_adresse);
           mButtonLayout = findViewById(R.id.update_statut_activity_button_layout);
@@ -68,7 +74,13 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           mButton5 = findViewById(R.id.update_statut_activity_button5);
           mButton6 = findViewById(R.id.update_statut_activity_button6);
           mButton7 = findViewById(R.id.update_statut_activity_button7);
+          mDeleteButton = findViewById(R.id.update_statut_activity_delete_button);
+          mRetourButton = findViewById(R.id.update_statut_activity_retour_button);
           //mAvatar = findViewById(R.id.update_statut_activity_avatar);
+
+          mDeleteButton.setOnClickListener(view -> deleteLastStatut(mRequestQueue));
+          mRetourButton.setOnClickListener(view -> finish());
+
           mButtons.add(mButton2);
           mButtons.add(mButton3);
           mButtons.add(mButton4);
@@ -76,22 +88,21 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           mButtons.add(mButton6);
           mButtons.add(mButton7);
 
+          for (int i = 0; i < mButtons.size(); i++) {
+               mButtons.get(i).setOnClickListener(this);
+          }
+
           Intent intent = getIntent();
           mBordereau = intent.getStringExtra("bordereau");
           mUser = intent.getParcelableExtra("user");
-
-          mAdresse.setText(("Bordereau n° : " + mBordereau + "\n").toUpperCase());
 
           chercherCourrier(mRequestQueue);
           getEtatsList(mRequestQueue);
      }
 
-     private void nonPrisEnCharge() {
-
-     }
-
      private void chercherCourrier(RequestQueue requestQueue) {
           String url = mUrl + "/facteur/recherche-bordereau?bordereau=" + mBordereau;
+          ArrayList<Statut> statutsList = new ArrayList<>();
           JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                   Request.Method.GET,
                   url,
@@ -102,6 +113,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                try {
                     courrier = response.getJSONObject("courrier");
                     mCourrier = new Courrier(courrier);
+                    mAdresse.setText(("Bordereau n° : " + mBordereau + "\n").toUpperCase());
                     mAdresse.append("\n" + mCourrier.getFullName() + mCourrier.getFullAdresse());
                } catch (JSONException e) {
                     e.printStackTrace();
@@ -109,14 +121,28 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                try {
                     statuts = response.getJSONArray("statuts");
                     for (int i = 0; i < statuts.length(); i++) {
-                         mStatuts.add(new Statut(statuts.getJSONObject(i)));
+                         statutsList.add(new Statut(statuts.getJSONObject(i)));
                     }
                } catch (JSONException | ParseException e) {
                     e.printStackTrace();
                }
-               if (mStatuts.size() != 0) {
-                    mAdresse.append(mStatuts.get(mStatuts.size() - 1).getStatutMessage());
+               if (statutsList.size() != 0) {
+                    mAdresse.append(statutsList.get(statutsList.size() - 1).getStatutMessage());
                }
+               System.out.println("satutsList : " + statutsList.size() + " " + statutsList.get(statutsList.size() - 1).getEtat());
+               if (statutsList.get(statutsList.size() - 1).getEtat() == 1) {
+                         mButton2.setVisibility(View.VISIBLE);
+                         for (int i = 1; i < 6; i++) {
+                              mButtons.get(i).setVisibility(View.GONE);
+                         }
+               } else {
+                    mButton2.setVisibility(View.GONE);
+                    for (int i = 1; i < 6; i++) {
+                         mButtons.get(i).setVisibility(View.VISIBLE);
+                    }
+
+               }
+
           }, error -> handleError(error)) {
                @Override
                public Map<String, String> getHeaders() {
@@ -129,25 +155,17 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           requestQueue.add(jsonObjectRequest);
      }
 
-     @SuppressLint("SetTextI18n")
-     private void caseNonCollecte(RequestQueue requestQueue) {
-          Button button = new Button(this);
-          button.setText("pris en charge");
-          mButtonLayout.addView(button);
-
-          button.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View view) {}
-          });
-     }
-
      private void updateStatut(int etat, RequestQueue requestQueue) {
           String url = mUrl + "/courriers/update-statut?state=" + etat + "&bordereau=" + mBordereau;
           JsonObjectRequest updateStatutRequest = new JsonObjectRequest(
                   Request.Method.GET,
                   url,
                   null,
-                  response -> System.out.println("coucou"),
+                  response -> {
+                       toaster("Statut mis à jour");
+                       chercherCourrier(mRequestQueue);
+                       mDeleteButton.setVisibility(View.VISIBLE);
+                  },
                   error -> handleError(error)) {
                @Override
                public Map<String, String> getHeaders() {
@@ -165,9 +183,8 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           System.out.println(error.networkResponse.statusCode);
           if(error.networkResponse.statusCode == 404) {
                mAdresse.setText("Courrier inexistant...");
-               msg = "dans le cul lulu !";
-               Toast toast = Toast.makeText(UpdateStatutActivity.this, msg, Toast.LENGTH_SHORT);
-               toast.show();
+               mButtonLayout.setVisibility(View.GONE);
+               toaster("Courrier non trouvé ...");
           }
      }
 
@@ -182,6 +199,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                             try {
                                  JSONObject tmp = (response.getJSONObject(i));
                                  mButtons.get(i - 1).setText(tmp.optString("etat"));
+                                 mEtatsList.add(tmp.optString("etat"));
                             } catch (JSONException e) {
                                  e.printStackTrace();
                             }
@@ -201,6 +219,64 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
 
      @Override
      public void onClick(View view) {
+          int etat = 1;
+          if (view == mButton2) {
+               etat = 2;
+          } else if (view == mButton3) {
+               etat = 3;
+          } else if (view == mButton4) {
+               etat = 4;
+          } else if (view == mButton5) {
+               etat = 5;
+          } else if (view == mButton6) {
+               etat = 6;
+          } else if (view == mButton7) {
+               etat = 7;
+          }
+          final int tmp = etat;
+          AlertDialog.Builder builder = new AlertDialog.Builder(this);
+          builder.setTitle("Confirmez :")
+                  .setMessage("Statut : " + mEtatsList.get(tmp - 2))
+                  .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                       @Override
+                       public void onClick(DialogInterface dialog, int which) {
+                            updateStatut(tmp, mRequestQueue );
+                       }
+                  })
+                  .setNegativeButton("ANNULER", new DialogInterface.OnClickListener() {
+                       @Override
+                       public void onClick(DialogInterface dialogInterface, int i) {
+                       }
+                  })
+                  .create()
+                  .show();
+     }
 
+     private void deleteLastStatut(RequestQueue requestQueue) {
+          String url = mUrl + "/facteur/delete?bordereau=" + mBordereau;
+          JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                  Request.Method.GET,
+                  url,
+                  null,
+                  response -> {
+                       toaster("Statut mis à jour !");
+                       chercherCourrier(mRequestQueue);
+                       mDeleteButton.setVisibility(View.GONE);
+                  },
+                  error -> handleError(error))
+          {
+               @Override
+               public Map<String, String> getHeaders() {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("Authorization", "Bearer " + mUser.getToken());
+
+                    return params;
+               }
+          };
+          mRequestQueue.add(jsonObjectRequest);
+     }
+
+     private void toaster(String msg) {
+          Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
      }
 }
