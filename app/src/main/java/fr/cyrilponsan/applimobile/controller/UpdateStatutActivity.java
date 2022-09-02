@@ -2,13 +2,10 @@ package fr.cyrilponsan.applimobile.controller;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.DownloadManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +25,6 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,18 +42,19 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
      private Button mButton6;
      private Button mButton7;
      private Button mDeleteButton;
-     private Button mRetourButton;
      private TextView mAdresse;
-     private ArrayList<Button> mButtons = new ArrayList<>();
+     private final ArrayList<Button> mButtons = new ArrayList<>();
      private LinearLayout mButtonLayout;
      private String mBordereau;
      private Courrier mCourrier;
      private User mUser;
-     private final ArrayList<Statut> mStatuts = new ArrayList<>();
      private final String mUrl = "https://step-post-nodejs.herokuapp.com";
-     private ImageView mAvatar;
      private RequestQueue mRequestQueue;
-     private ArrayList<String> mEtatsList = new ArrayList<>();
+     private final ArrayList<String> mEtatsList = new ArrayList<>();
+     private Statut mLastStatut;
+
+     public UpdateStatutActivity() {
+     }
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -75,11 +72,11 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           mButton6 = findViewById(R.id.update_statut_activity_button6);
           mButton7 = findViewById(R.id.update_statut_activity_button7);
           mDeleteButton = findViewById(R.id.update_statut_activity_delete_button);
-          mRetourButton = findViewById(R.id.update_statut_activity_retour_button);
+          Button retourButton = findViewById(R.id.update_statut_activity_retour_button);
           //mAvatar = findViewById(R.id.update_statut_activity_avatar);
 
-          mDeleteButton.setOnClickListener(view -> deleteLastStatut(mRequestQueue));
-          mRetourButton.setOnClickListener(view -> finish());
+          mDeleteButton.setOnClickListener(view -> deleteLastStatut());
+          retourButton.setOnClickListener(view -> finish());
 
           mButtons.add(mButton2);
           mButtons.add(mButton3);
@@ -96,14 +93,14 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           mBordereau = intent.getStringExtra("bordereau");
           mUser = intent.getParcelableExtra("user");
 
-          chercherCourrier(mRequestQueue);
-          getEtatsList(mRequestQueue);
+          chercherCourrier();
+          getEtatsList();
      }
 
-     private void chercherCourrier(RequestQueue requestQueue) {
+     private void chercherCourrier() {
           String url = mUrl + "/facteur/recherche-bordereau?bordereau=" + mBordereau;
           ArrayList<Statut> statutsList = new ArrayList<>();
-          JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+          @SuppressLint("SetTextI18n") JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                   Request.Method.GET,
                   url,
                   null,
@@ -127,10 +124,10 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                     e.printStackTrace();
                }
                if (statutsList.size() != 0) {
-                    mAdresse.append(statutsList.get(statutsList.size() - 1).getStatutMessage());
+                    mLastStatut = statutsList.get(statutsList.size() - 1);
+                    mAdresse.append(mLastStatut.getStatutMessage());
                }
-               System.out.println("satutsList : " + statutsList.size() + " " + statutsList.get(statutsList.size() - 1).getEtat());
-               if (statutsList.get(statutsList.size() - 1).getEtat() == 1) {
+               if (mLastStatut.getEtat() == 1) {
                          mButton2.setVisibility(View.VISIBLE);
                          for (int i = 1; i < 6; i++) {
                               mButtons.get(i).setVisibility(View.GONE);
@@ -143,7 +140,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
 
                }
 
-          }, error -> handleError(error)) {
+          }, this::handleError) {
                @Override
                public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<>();
@@ -152,10 +149,13 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                     return params;
                }
           };
-          requestQueue.add(jsonObjectRequest);
+          mRequestQueue.add(jsonObjectRequest);
      }
 
-     private void updateStatut(int etat, RequestQueue requestQueue) {
+     private void updateStatut(int etat) {
+          if (etat == mLastStatut.getEtat()) {
+               toaster("Ce statut existe déjà !");
+               return; }
           String url = mUrl + "/courriers/update-statut?state=" + etat + "&bordereau=" + mBordereau;
           JsonObjectRequest updateStatutRequest = new JsonObjectRequest(
                   Request.Method.GET,
@@ -163,10 +163,10 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                   null,
                   response -> {
                        toaster("Statut mis à jour");
-                       chercherCourrier(mRequestQueue);
+                       chercherCourrier();
                        mDeleteButton.setVisibility(View.VISIBLE);
                   },
-                  error -> handleError(error)) {
+                  this::handleError) {
                @Override
                public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<>();
@@ -175,11 +175,11 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                     return params;
                }
           };
-          requestQueue.add(updateStatutRequest);
+          mRequestQueue.add(updateStatutRequest);
      }
 
+     @SuppressLint("SetTextI18n")
      private void handleError(VolleyError error) {
-          String msg;
           System.out.println(error.networkResponse.statusCode);
           if(error.networkResponse.statusCode == 404) {
                mAdresse.setText("Courrier inexistant...");
@@ -188,7 +188,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           }
      }
 
-     private void getEtatsList(RequestQueue requestQueue) {
+     private void getEtatsList() {
           String url = mUrl + "/courriers/statuts";
           JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                   Request.Method.GET,
@@ -205,7 +205,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                             }
                        }
                   },
-                  error -> handleError(error)) {
+                  this::handleError) {
                @Override
                public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<>();
@@ -214,7 +214,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                     return params;
                }
           };
-          requestQueue.add(jsonArrayRequest);
+          mRequestQueue.add(jsonArrayRequest);
      }
 
      @Override
@@ -234,25 +234,21 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                etat = 7;
           }
           final int tmp = etat;
-          AlertDialog.Builder builder = new AlertDialog.Builder(this);
-          builder.setTitle("Confirmez :")
-                  .setMessage("Statut : " + mEtatsList.get(tmp - 2))
-                  .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                       @Override
-                       public void onClick(DialogInterface dialog, int which) {
-                            updateStatut(tmp, mRequestQueue );
-                       }
-                  })
-                  .setNegativeButton("ANNULER", new DialogInterface.OnClickListener() {
-                       @Override
-                       public void onClick(DialogInterface dialogInterface, int i) {
-                       }
-                  })
-                  .create()
-                  .show();
+          if (etat == 2) {
+               updateStatut(etat);
+          } else {
+               AlertDialog.Builder builder = new AlertDialog.Builder(this);
+               builder.setTitle("Confirmez :")
+                       .setMessage("Statut : " + mEtatsList.get(tmp - 2))
+                       .setPositiveButton("OK", (dialog, which) -> updateStatut(tmp))
+                       .setNegativeButton("ANNULER", (dialogInterface, i) -> {
+                       })
+                       .create()
+                       .show();
+          }
      }
 
-     private void deleteLastStatut(RequestQueue requestQueue) {
+     private void deleteLastStatut() {
           String url = mUrl + "/facteur/delete?bordereau=" + mBordereau;
           JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                   Request.Method.GET,
@@ -260,10 +256,10 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
                   null,
                   response -> {
                        toaster("Statut mis à jour !");
-                       chercherCourrier(mRequestQueue);
+                       chercherCourrier();
                        mDeleteButton.setVisibility(View.GONE);
                   },
-                  error -> handleError(error))
+                  this::handleError)
           {
                @Override
                public Map<String, String> getHeaders() {

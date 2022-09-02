@@ -49,14 +49,11 @@ public class RechercheCourrier extends AppCompatActivity {
             }
         });
 
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RechercheCourrier.this, UpdateStatutActivity.class);
-                intent.putExtra("bordereau", mEditText.getText().toString());
-                intent.putExtra("user", mUser);
-                startActivity(intent);
-            }
+        mButton.setOnClickListener(view -> {
+            Intent intent1 = new Intent(RechercheCourrier.this, UpdateStatutActivity.class);
+            intent1.putExtra("bordereau", mEditText.getText().toString());
+            intent1.putExtra("user", mUser);
+            startActivity(intent1);
         });
     }
 }
