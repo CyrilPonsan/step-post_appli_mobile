@@ -251,7 +251,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
      private void deleteLastStatut() {
           String url = mUrl + "/facteur/delete?bordereau=" + mBordereau;
           JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                  Request.Method.GET,
+                  Request.Method.DELETE,
                   url,
                   null,
                   response -> {
