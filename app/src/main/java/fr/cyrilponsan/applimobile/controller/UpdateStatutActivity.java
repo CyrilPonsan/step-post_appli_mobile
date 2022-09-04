@@ -156,7 +156,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           if (etat == mLastStatut.getEtat()) {
                toaster("Ce statut existe déjà !");
                return; }
-          String url = mUrl + "/courriers/update-statut?state=" + etat + "&bordereau=" + mBordereau;
+          String url = mUrl + "/facteur/update-statut?state=" + etat + "&bordereau=" + mBordereau;
           JsonObjectRequest updateStatutRequest = new JsonObjectRequest(
                   Request.Method.GET,
                   url,
