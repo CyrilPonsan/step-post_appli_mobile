@@ -90,11 +90,11 @@ public class MainActivity extends AppCompatActivity {
 
      private void login(RequestQueue requestQueue) {
           Map<String, String>  params = new HashMap<>();
-          params.put("username", "tata@toto.fr");
+          params.put("email", "tata@toto.fr");
           params.put("password", "Abcd@1234");
           JSONObject jsonParams = new JSONObject(params);
 
-          String url = "https://step-post-nodejs.herokuapp.com/auth/facteur/login";
+          String url = "https://step-post-nodejs.herokuapp.com/api/auth/facteur/login";
           JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                   Request.Method.POST,
                   url,
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
           }
           Toast toast = Toast.makeText(
                   MainActivity.this,
-                  msg,
+                  error.toString(),
                   Toast.LENGTH_SHORT);
           toast.show();
      }

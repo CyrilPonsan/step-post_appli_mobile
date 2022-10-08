@@ -98,49 +98,13 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
      }
 
      private void chercherCourrier() {
-          String url = mUrl + "/facteur/recherche-bordereau?bordereau=" + mBordereau;
-          ArrayList<Statut> statutsList = new ArrayList<>();
+          String url = mUrl + "/api/facteur/bordereau?bordereau=" + mBordereau;
           @SuppressLint("SetTextI18n") JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                   Request.Method.GET,
                   url,
                   null,
-                  response -> {
-               JSONObject courrier;
-               JSONArray statuts;
-               try {
-                    courrier = response.getJSONObject("courrier");
-                    mCourrier = new Courrier(courrier);
-                    mAdresse.setText(("Bordereau n° : " + mBordereau + "\n").toUpperCase());
-                    mAdresse.append("\n" + mCourrier.getFullName() + mCourrier.getFullAdresse());
-               } catch (JSONException e) {
-                    e.printStackTrace();
-               }
-               try {
-                    statuts = response.getJSONArray("statuts");
-                    for (int i = 0; i < statuts.length(); i++) {
-                         statutsList.add(new Statut(statuts.getJSONObject(i)));
-                    }
-               } catch (JSONException | ParseException e) {
-                    e.printStackTrace();
-               }
-               if (statutsList.size() != 0) {
-                    mLastStatut = statutsList.get(statutsList.size() - 1);
-                    mAdresse.append(mLastStatut.getStatutMessage());
-               }
-               if (mLastStatut.getEtat() == 1) {
-                         mButton2.setVisibility(View.VISIBLE);
-                         for (int i = 1; i < 6; i++) {
-                              mButtons.get(i).setVisibility(View.GONE);
-                         }
-               } else {
-                    mButton2.setVisibility(View.GONE);
-                    for (int i = 1; i < 6; i++) {
-                         mButtons.get(i).setVisibility(View.VISIBLE);
-                    }
-
-               }
-
-          }, this::handleError) {
+                  this::handleResponse ,
+                  this::handleError) {
                @Override
                public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<>();
@@ -152,11 +116,50 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
           mRequestQueue.add(jsonObjectRequest);
      }
 
+     private void handleResponse(JSONObject response) {
+          ArrayList<Statut> statutsList = new ArrayList<>();
+          JSONObject courrier;
+          JSONArray statuts;
+          try {
+               courrier = response.getJSONObject("courrier");
+               mCourrier = new Courrier(courrier);
+               mAdresse.setText(("Bordereau n° : " + mBordereau + "\n").toUpperCase());
+               mAdresse.append("\n" + mCourrier.getFullName() + mCourrier.getFullAdresse());
+          } catch (JSONException e) {
+               e.printStackTrace();
+          }
+          try {
+               statuts = response.getJSONArray("statuts");
+               for (int i = 0; i < statuts.length(); i++) {
+                    statutsList.add(new Statut(statuts.getJSONObject(i)));
+               }
+          } catch (JSONException | ParseException e) {
+               e.printStackTrace();
+          }
+          if (statutsList.size() != 0) {
+               mLastStatut = statutsList.get(statutsList.size() - 1);
+               mAdresse.append(mLastStatut.getStatutMessage());
+          }
+          if (mLastStatut.getEtat() == 1) {
+               mButton2.setVisibility(View.VISIBLE);
+               for (int i = 1; i < 6; i++) {
+                    mButtons.get(i).setVisibility(View.GONE);
+               }
+          } else {
+               mButton2.setVisibility(View.GONE);
+               for (int i = 1; i < 6; i++) {
+                    mButtons.get(i).setVisibility(View.VISIBLE);
+               }
+
+          }
+
+     }
+
      private void updateStatut(int etat) {
           if (etat == mLastStatut.getEtat()) {
                toaster("Ce statut existe déjà !");
                return; }
-          String url = mUrl + "/facteur/update-statut?state=" + etat + "&bordereau=" + mBordereau;
+          String url = mUrl + "/api/facteur/update?state=" + etat + "&bordereau=" + mBordereau;
           JsonObjectRequest updateStatutRequest = new JsonObjectRequest(
                   Request.Method.GET,
                   url,
@@ -189,7 +192,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
      }
 
      private void getEtatsList() {
-          String url = mUrl + "/courriers/statuts";
+          String url = mUrl + "/api/client/courriers/statuts";
           JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                   Request.Method.GET,
                   url,
@@ -249,7 +252,7 @@ public class UpdateStatutActivity extends AppCompatActivity implements View.OnCl
      }
 
      private void deleteLastStatut() {
-          String url = mUrl + "/facteur/delete?bordereau=" + mBordereau;
+          String url = mUrl + "/api/facteur/delete?bordereau=" + mBordereau;
           JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                   Request.Method.DELETE,
                   url,

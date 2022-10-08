@@ -34,13 +34,13 @@ public class Statut {
 
      public String getEtatMessage() {
           String[] etats = {
-                  "pas encore collecté",
+                  "en attente",
                   "pris en charge",
                   "avisé",
                   "mis en instance",
                   "distribué",
                   "NPAI",
-                  "retour à l'expéditeur"
+                  "non réclamé"
           };
           return etats[etat - 1];
      }

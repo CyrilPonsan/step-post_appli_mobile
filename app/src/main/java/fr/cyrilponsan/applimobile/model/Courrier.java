@@ -14,6 +14,7 @@ public class Courrier {
      private final String codePostal;
      private final String ville;
 
+
      public Courrier(JSONObject courrier) {
           id = courrier.optInt("id");
           bordereau = courrier.optString("bordereau");
