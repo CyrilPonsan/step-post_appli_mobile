@@ -32,7 +32,7 @@ public class Courrier {
      }
 
      public String getFullName() {
-          return (civilite + " " + prenom + " " + nom + "\n").toUpperCase();
+          return (prenom + " " + nom + "\n").toUpperCase();
      }
 
      public String getFullAdresse() {

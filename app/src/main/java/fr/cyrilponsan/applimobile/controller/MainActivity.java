@@ -90,8 +90,8 @@ public class MainActivity extends AppCompatActivity {
 
      private void login(RequestQueue requestQueue) {
           Map<String, String>  params = new HashMap<>();
-          params.put("email", "tata@toto.fr");
-          params.put("password", "Abcd@1234");
+          params.put("username", "tata@toto.fr");
+          params.put("password", "1234");
           JSONObject jsonParams = new JSONObject(params);
 
           String url = "https://step-post-nodejs.herokuapp.com/api/auth/facteur/login";
